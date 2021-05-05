@@ -1,57 +1,68 @@
-import logo from './logo.svg';
 import './App.css';
 import React from 'react';
 
 function Title() {
   return (
-    <div class="p-8 bg-green-500">
-      <h1 class="font-mono font-bold text-4xl text-white">ToDo App</h1>
+    <div className="p-8 bg-green-500">
+      <h1 className="font-mono font-bold text-4xl text-white">ToDo App</h1>
     </div>
   );
 }
 
-class Todo extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+function ToDoForm() {
+  const [todos, setTodos] = React.useState([]);
+  const [text, setText] = React.useState('');
 
-  render() {
-    return (
-      <div class="flex px-4 py-2 my-2 bg-white rounded-2xl">
-        <div class="pr-4 flex-grow">{this.props.text}</div>
-        <div class="pr-4 flex-none">
-          <input type="checkbox" class="h-6 w-6" />
-        </div>
+  const handleChange = e => setText(e.target.value);
+
+  const handleSubmit = function(event) {
+    const todoCopy = todos.slice();
+    todoCopy.push(text);
+    setTodos(todoCopy);
+    setText('');
+    event.preventDefault();
+  };
+
+  return (
+    <div>
+      <div className="mb-4">
+        <form onSubmit={handleSubmit}>
+          <input className="p-2" type="text" value={text} onChange={handleChange} />
+          <input className="p-2" type="submit" value="Add ToDo" />
+        </form>
       </div>
-    );
-  }
+      <TodoItems todos={todos} />
+    </div>
+  );
 }
 
-class TodoItems extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      todos: Array(),
-    }
-  }
-
-  render() {
-    return (
-      <div>
-        <Todo text='hoge' />
-        <Todo text='fuga' />
-        <Todo text='aaaaaaa' />
+function Todo({text}) {
+  return (
+    <div className="flex px-4 py-2 my-2 bg-white rounded-2xl">
+      <div className="pr-4 flex-grow">{text}</div>
+      <div className="pr-4 flex-none">
+        <input type="checkbox" className="h-6 w-6" />
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+function TodoItems({todos}) {
+  return (
+    <div>
+      {todos.map(todo => (
+        <Todo key={todo} text={todo} />
+      ))}
+    </div>
+  );
 }
 
 function App() {
   return (
     <div className="min-h-screen justify-center bg-gray-100">
       <Title />
-      <div class="p-8">
-        <TodoItems />
+      <div className="p-4">
+        <ToDoForm />
       </div>
     </div>
   );
