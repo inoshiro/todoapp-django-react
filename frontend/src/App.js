@@ -10,6 +10,8 @@ function Title() {
 }
 
 function ToDoForm() {
+  const getKey = () => Math.random().toString(32).substring(2);
+
   const [todos, setTodos] = React.useState([]);
   const [text, setText] = React.useState('');
 
@@ -17,11 +19,21 @@ function ToDoForm() {
 
   const handleSubmit = function(event) {
     const todoCopy = todos.slice();
-    todoCopy.push(text);
+    todoCopy.push({key: getKey(), text: text, finished: ''});
     setTodos(todoCopy);
     setText('');
     event.preventDefault();
   };
+
+  const handleCheck = checked => {
+    const newTodos = todos.map(todo => {
+      if (todo.key === checked.key) {
+        todo.finished = !todo.finished;
+      }
+      return todo;
+    });
+    setTodos(newTodos);
+  }
 
   return (
     <div>
@@ -31,28 +43,35 @@ function ToDoForm() {
           <input className="p-2" type="submit" value="Add ToDo" />
         </form>
       </div>
-      <TodoItems todos={todos} />
-    </div>
-  );
-}
-
-function Todo({text}) {
-  return (
-    <div className="flex px-4 py-2 my-2 bg-white rounded-2xl">
-      <div className="pr-4 flex-grow">{text}</div>
-      <div className="pr-4 flex-none">
-        <input type="checkbox" className="h-6 w-6" />
+      <div>
+        {todos.map(todo => (
+          <Todo
+            key={todo.key}
+            todo={todo}
+            onCheck={handleCheck}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-function TodoItems({todos}) {
+function Todo({todo, onCheck}) {
+  const handleChange = () => {
+    onCheck(todo);
+  };
+
   return (
-    <div>
-      {todos.map(todo => (
-        <Todo key={todo} text={todo} />
-      ))}
+    <div className="flex px-4 py-2 my-2 bg-white rounded-2xl">
+      <div className="pr-4 flex-grow">{todo.text}</div>
+      <div className="pr-4 flex-none">
+        <input
+          type="checkbox"
+          className="h-6 w-6"
+          checked={todo.finished}
+          onChange={handleChange}
+        />
+      </div>
     </div>
   );
 }
