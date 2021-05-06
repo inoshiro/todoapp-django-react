@@ -14,12 +14,13 @@ function ToDoForm() {
 
   const [todos, setTodos] = React.useState([]);
   const [text, setText] = React.useState('');
+  const [filter, setFilter] = React.useState('All');
 
   const handleChange = e => setText(e.target.value);
 
   const handleSubmit = function(event) {
     const todoCopy = todos.slice();
-    todoCopy.push({key: getKey(), text: text, finished: ''});
+    todoCopy.unshift({key: getKey(), text: text, finished: false});
     setTodos(todoCopy);
     setText('');
     event.preventDefault();
@@ -35,6 +36,14 @@ function ToDoForm() {
     setTodos(newTodos);
   }
 
+  const handleFilterChange = value => setFilter(value);
+
+  const displayTodos = todos.filter(todo => {
+    if (filter === 'All') return true;
+    if (filter === 'ToDo') return !todo.finished;
+    if (filter === 'Done') return todo.finished;
+  });
+
   return (
     <div>
       <div className="mb-4">
@@ -43,8 +52,9 @@ function ToDoForm() {
           <input className="p-2" type="submit" value="Add ToDo" />
         </form>
       </div>
+      <Filter value={filter} onChange={handleFilterChange} />
       <div>
-        {todos.map(todo => (
+        {displayTodos.map(todo => (
           <Todo
             key={todo.key}
             todo={todo}
@@ -53,6 +63,40 @@ function ToDoForm() {
         ))}
       </div>
     </div>
+  );
+}
+
+function Filter({value, onChange}) {
+  const handleClick = tabName => {
+    onChange(tabName);
+  }
+
+  return (
+    <div className="p m-2 border-b flex justify-center">
+      <FilterTab name='All' selected={value} onClick={handleClick} />
+      <FilterTab name='ToDo' selected={value} onClick={handleClick} />
+      <FilterTab name='Done' selected={value} onClick={handleClick} />
+    </div>
+  );
+}
+
+function FilterTab({name, selected, onClick}) {
+  const getStyle = (name, selected) => {
+    let style = 'mx-4 px-4 rounded-t-lg cursor-pointer'
+    if (name == selected) {
+      style += ' bg-gray-300';
+    } else {
+      style += ' bg-white';
+    }
+    return style;
+  }
+
+  const handleClick = () => {
+    onClick(name);
+  }
+
+  return (
+    <div className={getStyle(name, selected)} onClick={handleClick}>{name}</div>
   );
 }
 
