@@ -1,5 +1,5 @@
 import './App.css';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Title() {
   return (
@@ -12,17 +12,19 @@ function Title() {
 function ToDoForm() {
   const getKey = () => Math.random().toString(32).substring(2);
 
-  const [todos, setTodos] = React.useState([]);
-  const [text, setText] = React.useState('');
-  const [filter, setFilter] = React.useState('All');
+  const [error, setError] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [todos, setTodos] = useState([]);
+  const [title, setTitle] = useState('');
+  const [filter, setFilter] = useState('All');
 
-  const handleChange = e => setText(e.target.value);
+  const handleChange = e => setTitle(e.target.value);
 
   const handleSubmit = function(event) {
     const todoCopy = todos.slice();
-    todoCopy.unshift({key: getKey(), text: text, finished: false});
+    todoCopy.unshift({key: getKey(), title: title, finished: false});
     setTodos(todoCopy);
-    setText('');
+    setTitle('');
     event.preventDefault();
   };
 
@@ -44,11 +46,26 @@ function ToDoForm() {
     if (filter === 'Done') return todo.finished;
   });
 
+  useEffect(() => {
+    fetch("http://192.168.33.10:8000/todos/")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          setIsLoaded(true);
+          setTodos(result);
+        },
+        (error) => {
+          setIsLoaded(true);
+          setError(error);
+        }
+      )
+  }, [])
+
   return (
     <div>
       <div className="mb-4">
         <form onSubmit={handleSubmit}>
-          <input className="p-2" type="text" value={text} onChange={handleChange} />
+          <input className="p-2" type="title" value={title} onChange={handleChange} />
           <input className="p-2" type="submit" value="Add ToDo" />
         </form>
       </div>
@@ -83,7 +100,7 @@ function Filter({value, onChange}) {
 function FilterTab({name, selected, onClick}) {
   const getStyle = (name, selected) => {
     let style = 'mx-4 px-4 rounded-t-lg cursor-pointer'
-    if (name == selected) {
+    if (name === selected) {
       style += ' bg-gray-300';
     } else {
       style += ' bg-white';
@@ -107,7 +124,7 @@ function Todo({todo, onCheck}) {
 
   return (
     <div className="flex px-4 py-2 my-2 bg-white rounded-2xl">
-      <div className="pr-4 flex-grow">{todo.text}</div>
+      <div className="pr-4 flex-grow">{todo.title}</div>
       <div className="pr-4 flex-none">
         <input
           type="checkbox"
